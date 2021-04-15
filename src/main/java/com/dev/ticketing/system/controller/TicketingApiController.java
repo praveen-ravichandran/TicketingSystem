@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,16 +15,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dev.ticketing.system.business.ErrorHandler;
 import com.dev.ticketing.system.business.UserBusiness;
+import com.dev.ticketing.system.business.validator.TicketResponseValidator;
 import com.dev.ticketing.system.business.validator.TicketValidator;
 import com.dev.ticketing.system.constant.Constants;
 import com.dev.ticketing.system.model.ResponseErrorModel;
 import com.dev.ticketing.system.model.TicketModel;
 import com.dev.ticketing.system.model.TicketResponseModel;
 import com.dev.ticketing.system.model.UserModel;
+import com.dev.ticketing.system.model.enumtype.TicketStatus;
 import com.dev.ticketing.system.service.EmailService;
 
 /**
@@ -36,13 +41,11 @@ public class TicketingApiController {
 	int ticketCounter = 0;
 	
 	private TicketValidator ticketValidator = new TicketValidator();
+	private TicketResponseValidator ticketResponseValidator = new TicketResponseValidator();
 	private ErrorHandler errHandler = new ErrorHandler();
 	
 	@RequestMapping(value = Constants.GET_TICKET_API, method = RequestMethod.GET)
-	public @ResponseBody Object getTicket(@PathVariable("id") int ticketId, @RequestHeader("User-Mail") String userMail) {
-		if(!UserBusiness.isValidUser(usersTable, userMail)) {
-			return errHandler.buildError("USER_INVALID", "OOPS! User not valid!");
-		}	
+	public @ResponseBody Object getTicket(@PathVariable("id") int ticketId) {
 		if(!ticketsTable.containsKey(ticketId)) {
 			return errHandler.buildError("TICKET_NOT_AVAILABLE", "Ticket Id not available!");
 		}
@@ -50,15 +53,21 @@ public class TicketingApiController {
 	}
 	
 	@RequestMapping(value = Constants.GET_ALL_TICKET_API, method = RequestMethod.GET)
-	public @ResponseBody Object getAllTickets(@RequestHeader("User-Mail") String userMail) {
-		if(!UserBusiness.isValidUser(usersTable, userMail)) {
-			return errHandler.buildError("USER_INVALID", "OOPS! User not valid!");
-		}
+	public @ResponseBody Object getAllTickets(@RequestParam(required = false) String assignedAgentMail,
+			@RequestParam(required = false) String customerMail,
+			@RequestParam(required = false) TicketStatus status) {
 		List<TicketModel> tickets = new ArrayList<TicketModel>();
-		Set<Integer> ticketIdKeys = ticketsTable.keySet();
-		for(Integer i : ticketIdKeys){
-			tickets.add(ticketsTable.get(i));
-		}
+		/*
+		 * for(Integer i : ticketIdKeys){ tickets.add(ticketsTable.get(i)); }
+		 */
+		tickets = ticketsTable
+			.entrySet()
+			.stream()
+			.filter(ticket -> (Objects.isNull(status) || ticket.getValue().getStatus() == status)
+					&& (Objects.isNull(assignedAgentMail) || ticket.getValue().getAssignedAgentMail().equals(assignedAgentMail))
+					&& (Objects.isNull(customerMail) || ticket.getValue().getCustomerMail().equals(customerMail)))
+			.map(t -> t.getValue())
+			.collect(Collectors.toList());
 		return tickets;
 	}
 	
@@ -113,12 +122,19 @@ public class TicketingApiController {
 	
 	@RequestMapping(value = Constants.RESPONSE_TICKET_API, method = RequestMethod.POST)
 	public @ResponseBody Object responseToTicket(@PathVariable("id") int ticketId, @RequestBody TicketResponseModel ticketResponse, @RequestHeader("User-Mail") String userMail) {
+		List<ResponseErrorModel> errors = new ArrayList<>();
 		if(!UserBusiness.isValidUser(usersTable, userMail)) {
-			return errHandler.buildError("USER_INVALID", "OOPS! User not valid!");
+			errors.add(errHandler.buildError("USER_INVALID", "OOPS! User not valid!"));
+			return errors;
 		}
 		TicketModel srcTicket = ticketsTable.get(ticketId);
 		if (srcTicket == null) {
-			return errHandler.buildError("TICKET_NOT_AVAILABLE", "Ticket Id not available!");
+			errors.add(errHandler.buildError("TICKET_NOT_AVAILABLE", "Ticket Id not available!"));
+			return errors;
+		}
+		ticketResponseValidator.validate(ticketResponse, errors);
+		if (errors.size() > 0) {
+			return errors;
 		}
 		List<TicketResponseModel> srcTicketResponses = srcTicket.getResponses();
 		if(srcTicketResponses == null) {

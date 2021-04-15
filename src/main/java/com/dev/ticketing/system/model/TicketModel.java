@@ -17,7 +17,7 @@ public class TicketModel implements Serializable{
 	private TicketStatus status;
 	private TicketPriority priority;
 	private String customerMail;
-	private int assignedAgentUserId;
+	private String assignedAgentMail;
 	private String createdUser;
 	private Date createdDate;
 	private String updatedUser;
@@ -66,11 +66,11 @@ public class TicketModel implements Serializable{
 		this.customerMail = customerMail;
 	}
 	
-	public int getAssignedAgentUserId() {
-		return assignedAgentUserId;
+	public String getAssignedAgentMail() {
+		return assignedAgentMail;
 	}
-	public void setAssignedAgentUserId(int assignedAgentUserId) {
-		this.assignedAgentUserId = assignedAgentUserId;
+	public void setAssignedAgentMail(String assignedAgentMail) {
+		this.assignedAgentMail = assignedAgentMail;
 	}
 	
 	public String getCreatedUser() {
