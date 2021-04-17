@@ -91,6 +91,7 @@ public class TicketingApiController {
 			}
 		} else if (ticketsTable.containsKey(ticket.getId())) {
 			TicketModel srcTicket = ticketsTable.get(ticket.getId());
+			TicketStatus prevStatus = srcTicket.getStatus();
 			srcTicket.setTitle(ticket.getTitle());
 			srcTicket.setDescription(ticket.getDescription());
 			srcTicket.setStatus(ticket.getStatus());
@@ -100,7 +101,8 @@ public class TicketingApiController {
 			srcTicket.setUpdatedUser(userMail);
 			ticketValidator.validate(ticket, errors);
 			if(errors.size() == 0) {
-				if(srcTicket.getStatus() == TicketStatus.CLOSED) {
+				if(ticket.getStatus() != null && prevStatus != ticket.getStatus()
+						&& srcTicket.getStatus() == TicketStatus.CLOSED) {
 					agentQueue.ticketCompletedUpdate(usersTable.get(srcTicket.getAssignedAgentMail()).getAgentNode());
 				}
 				ticketsTable.put(ticket.getId(), srcTicket);

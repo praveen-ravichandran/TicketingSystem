@@ -68,33 +68,42 @@ public class AgentQueue {
 		int currTicketCount = curr.data.getTicketAssignedCounter() - 1;
 		curr.data.setTicketAssignedCounter(currTicketCount);
 
-		AgentNode insertAfterTargetNode = null;
-		while (temp.prev != null) {
-			temp = temp.prev;
-
-			if (temp.data.getTicketAssignedCounter() <= curr.data.getTicketAssignedCounter()) {
-				insertAfterTargetNode = temp;
-				break;
+		if(temp.prev != null && temp.prev.data.getTicketAssignedCounter() != curr.data.getTicketAssignedCounter()) {
+			
+			AgentNode insertAfterTargetNode = null;
+			while (temp.prev != null) {
+				temp = temp.prev;
+	
+				if (temp.data.getTicketAssignedCounter() <= curr.data.getTicketAssignedCounter()) {
+					insertAfterTargetNode = temp;
+					break;
+				}
 			}
+				
+			if (curr.next == null)
+				curr.prev.next = null;
+			else
+				curr.next.prev = curr.prev;
+			
+			if (curr.prev == null)
+				curr.next.prev = null;
+			else
+				curr.prev.next = curr.next;
+	
+			if (insertAfterTargetNode != null) {				
+				AgentNode currNextNode = insertAfterTargetNode.next;
+				insertAfterTargetNode.next = curr;
+				curr.prev = insertAfterTargetNode;
+				curr.next = currNextNode;
+			} else {
+				head.prev = curr;
+				curr.next = head;
+				head = curr;
+				head.prev = null;
+			}
+	
 		}
-
-		if (curr.prev != null)
-			curr.prev.next = curr.next;
-		if (curr.next != null)
-			curr.next.prev = curr.prev;
-
-		if (insertAfterTargetNode != null) {
-			AgentNode nextNode = insertAfterTargetNode.next;
-			insertAfterTargetNode.next = curr;
-			curr.prev = insertAfterTargetNode;
-			curr.next = nextNode;
-		} else {
-			head.prev = curr;
-			curr.next = head;
-			curr.prev = null;
-			head = curr;
-		}
-
+		
 		printLinkedListForward();
 
 	}
