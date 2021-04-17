@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dev.ticketing.system.business.ErrorHandler;
 import com.dev.ticketing.system.business.UserBusiness;
+import com.dev.ticketing.system.business.ticketassignment.AgentQueue;
 import com.dev.ticketing.system.business.validator.TicketResponseValidator;
 import com.dev.ticketing.system.business.validator.TicketValidator;
 import com.dev.ticketing.system.constant.Constants;
@@ -38,6 +38,7 @@ public class TicketingApiController {
 	
 	public static Map<Integer, TicketModel> ticketsTable = new HashMap<Integer, TicketModel>();
 	public static Map<String, UserModel> usersTable = new HashMap<String, UserModel>();
+	public static AgentQueue agentQueue = new AgentQueue();
 	int ticketCounter = 0;
 	
 	private TicketValidator ticketValidator = new TicketValidator();
@@ -84,6 +85,7 @@ public class TicketingApiController {
 				ticket.setId(currTicketId);
 				ticket.setCreatedDate(new Date());
 				ticket.setCreatedUser(userMail);
+				ticket.setAssignedAgentMail(agentQueue.assignTicket());
 				ticketsTable.put(ticket.getId(), ticket);
 				return ticket;
 			}
@@ -98,6 +100,9 @@ public class TicketingApiController {
 			srcTicket.setUpdatedUser(userMail);
 			ticketValidator.validate(ticket, errors);
 			if(errors.size() == 0) {
+				if(srcTicket.getStatus() == TicketStatus.CLOSED) {
+					agentQueue.ticketCompletedUpdate(usersTable.get(srcTicket.getAssignedAgentMail()).getAgentNode());
+				}
 				ticketsTable.put(ticket.getId(), srcTicket);
 				return srcTicket;
 			}
@@ -154,6 +159,14 @@ public class TicketingApiController {
 		ticketsTable.put(ticketId, srcTicket);
 		return srcTicketResponses;
 	}
+	
+	/*
+	 * http://localhost:8080/TicketingSystem/api/user?id=4&userMail=sample@sample.com&agent=true
+	 */
+//	@RequestMapping(value = "/api/user", method = RequestMethod.GET)
+//	public @ResponseBody void addUser(@RequestParam int id, @RequestParam String userMail, @RequestParam boolean agent) {
+//		usersTable.put(userMail, UserBusiness.buildUser(id, userMail, agent));
+//	}
 	
 	static {
 		usersTable.put("mailgsample@gmail.com", UserBusiness.buildUser(1, "mailgsample@gmail.com", true));

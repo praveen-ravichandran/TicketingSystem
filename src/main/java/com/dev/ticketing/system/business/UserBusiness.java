@@ -2,6 +2,7 @@ package com.dev.ticketing.system.business;
 
 import java.util.Map;
 
+import com.dev.ticketing.system.controller.TicketingApiController;
 import com.dev.ticketing.system.model.UserModel;
 
 public class UserBusiness {
@@ -11,6 +12,9 @@ public class UserBusiness {
 		user.setUserId(id);
 		user.setEmailAddress(email);
 		user.setAgent(isAgent);
+		if(isAgent) {
+			user.setAgentNode(TicketingApiController.agentQueue.addNewAgent(user));
+		}
 		return user;
 	}
 	
