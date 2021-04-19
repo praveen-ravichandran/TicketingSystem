@@ -70,20 +70,24 @@ public class DBQueryConst {
 	public static final String GET_USER_BY_ID = "SELECT * FROM User"
 			+ " WHERE EmailAddress = ?";
 	
-	public static final String UPDATE_STATUS_SCHEDULED = "UPDATE Ticket t"
-			+ " JOIN ("
+	public static final String GET_UPDATE_STATUS_SCHEDULED_DATASET = "CREATE TEMPORARY TABLE TicketStatusToUpdateTable"
 			+ " SELECT t.TicketId, MAX(ActionDate) AS LastResolved FROM Ticket t"
 			+ " JOIN TicketStatusAuditLog log ON t.TicketId = log.TicketId"
 			+ " WHERE"
 			+ " t.StatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"RESOLVED\")"
 			+ " AND log.ToStatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"RESOLVED\")"
 			+ " GROUP BY TicketId"
-			+ " ORDER BY ActionDate DESC) l ON t.TicketId = l.TicketId"
+			+ " ORDER BY ActionDate DESC;";
+	
+	public static final String UPDATE_STATUS_SCHEDULED = "UPDATE Ticket t"
+			+ " JOIN TicketStatusToUpdateTable l ON t.TicketId = l.TicketId"
 			+ " SET"
 			+ " StatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"CLOSED\"),"
 			+ " UpdatedUserId = (SELECT UserId FROM User WHERE EmailAddress = \"support@ticketing.com\"),"
 			+ " UpdatedDate = CURRENT_TIMESTAMP"
 			+ " WHERE"
-			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 30";
+			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 1;";
+	
+	public static final String DROP_UPDATE_STATUS_SCHEDULED_DATASET_TEMP_TABLE = "Drop Temporary Table TicketStatusToUpdateTable;";
 	
 }

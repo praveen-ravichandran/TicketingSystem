@@ -160,7 +160,11 @@ public class TicketDao {
 	}
 
 	public void updateTicketStatusScheduled() {
-		template.update(DBQueryConst.UPDATE_STATUS_SCHEDULED);
+		template.batchUpdate(
+				DBQueryConst.GET_UPDATE_STATUS_SCHEDULED_DATASET,
+				DBQueryConst.UPDATE_STATUS_SCHEDULED,
+				DBQueryConst.DROP_UPDATE_STATUS_SCHEDULED_DATASET_TEMP_TABLE
+			);
 	}
 
 }
