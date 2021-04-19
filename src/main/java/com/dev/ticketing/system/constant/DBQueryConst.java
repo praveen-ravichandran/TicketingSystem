@@ -70,20 +70,20 @@ public class DBQueryConst {
 	public static final String GET_USER_BY_ID = "SELECT * FROM User"
 			+ " WHERE EmailAddress = ?";
 	
-	public static final String UPDATE_STATUS_SCHEDULED = "UPDATE Ticket"
-			+ " SET"
-			+ " StatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"CLOSED\")"
-			+ " UpdatedUserId = (SELECT UserId FROM User WHERE EmailAddress = \"support@ticketing.com\")"
-			+ " UpdatedDate = CURRENT_TIMESTAMP"
-			+ " WHERE TicketId IN ("
-			+ " SELECT TicketId FROM (SELECT t.TicketId, MAX(ActionDate) AS LastResolved FROM Ticket t"
+	public static final String UPDATE_STATUS_SCHEDULED = "UPDATE Ticket t"
+			+ " JOIN ("
+			+ " SELECT t.TicketId, MAX(ActionDate) AS LastResolved FROM Ticket t"
 			+ " JOIN TicketStatusAuditLog log ON t.TicketId = log.TicketId"
 			+ " WHERE"
 			+ " t.StatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"RESOLVED\")"
 			+ " AND log.ToStatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"RESOLVED\")"
 			+ " GROUP BY TicketId"
-			+ " ORDER BY ActionDate DESC) l"
+			+ " ORDER BY ActionDate DESC) l ON t.TicketId = l.TicketId"
+			+ " SET"
+			+ " StatusId = (SELECT TicketStatusId FROM TicketStatus WHERE Name = \"CLOSED\"),"
+			+ " UpdatedUserId = (SELECT UserId FROM User WHERE EmailAddress = \"support@ticketing.com\"),"
+			+ " UpdatedDate = CURRENT_TIMESTAMP"
 			+ " WHERE"
-			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 30)";
+			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 30";
 	
 }
