@@ -86,7 +86,7 @@ public class DBQueryConst {
 			+ " UpdatedUserId = (SELECT UserId FROM User WHERE EmailAddress = \"support@ticketing.com\"),"
 			+ " UpdatedDate = CURRENT_TIMESTAMP"
 			+ " WHERE"
-			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 1;";
+			+ " DATEDIFF(CURRENT_TIMESTAMP, LastResolved) >= 30;";
 	
 	public static final String DROP_UPDATE_STATUS_SCHEDULED_DATASET_TEMP_TABLE = "Drop Temporary Table TicketStatusToUpdateTable;";
 	
