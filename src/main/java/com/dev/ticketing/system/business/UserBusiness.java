@@ -1,24 +1,20 @@
 package com.dev.ticketing.system.business;
 
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.dev.ticketing.system.controller.TicketingApiController;
+import com.dev.ticketing.system.dao.UserDao;
 import com.dev.ticketing.system.model.UserModel;
 
 public class UserBusiness {
 
-	public static UserModel buildUser(int id, String email, boolean isAgent) {
-		UserModel user = new UserModel();
-		user.setUserId(id);
-		user.setEmailAddress(email);
-		user.setAgent(isAgent);
-		if(isAgent) {
-			user.setAgentNode(TicketingApiController.agentQueue.addNewAgent(user));
-		}
-		return user;
+	@Autowired
+	UserDao userDao;
+
+	public boolean isValidUser(String checkingEmail) {
+		return userDao.getUserByEmailAddress(checkingEmail) != null;
 	}
-	
-	public static boolean isValidUser(Map<String, UserModel> users, String checkingEmail) {
-		return users.containsKey(checkingEmail);
+
+	public UserModel getUserByEmailAddress(String checkingEmail) {
+		return userDao.getUserByEmailAddress(checkingEmail);
 	}
 }

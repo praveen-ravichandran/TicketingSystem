@@ -23,6 +23,34 @@
 	<beans:bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"></beans:bean>	
 	
 	<beans:bean id="statusUpdateScheduler" class="com.dev.ticketing.system.service.StatusUpdateScheduler"></beans:bean>	
+	<beans:bean id="emailService" class="com.dev.ticketing.system.service.EmailService"></beans:bean>
+	
+	<beans:bean id="ds" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver"></beans:property>
+		<beans:property name="url" value="jdbc:mysql://localhost:3306/ticketingsystem"></beans:property>
+		<beans:property name="username" value="root"></beans:property>
+		<beans:property name="password" value=""></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="jt" class="org.springframework.jdbc.core.JdbcTemplate">
+		<beans:property name="dataSource" ref="ds"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="ticketDao" class="com.dev.ticketing.system.dao.TicketDao">
+		<beans:property name="template" ref="jt"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="userDao" class="com.dev.ticketing.system.dao.UserDao">
+		<beans:property name="template" ref="jt"></beans:property>
+	</beans:bean>
+	
+	<beans:bean id="ticketBusiness" class="com.dev.ticketing.system.business.TicketBusiness"></beans:bean>
+	<beans:bean id="userBusiness" class="com.dev.ticketing.system.business.UserBusiness"></beans:bean>
+	<beans:bean id="ticketValidator" class="com.dev.ticketing.system.business.validator.TicketValidator"></beans:bean>
+	<beans:bean id="ticketResponseValidator" class="com.dev.ticketing.system.business.validator.TicketResponseValidator"></beans:bean>
+	
+	<beans:bean id="dBHelper" class="com.dev.ticketing.system.common.DBHelper"></beans:bean>
+	<beans:bean id="errorHandler" class="com.dev.ticketing.system.common.ErrorHandler"></beans:bean>
 	
 	<context:component-scan base-package="com.dev.ticketing.system.controller" />
 	

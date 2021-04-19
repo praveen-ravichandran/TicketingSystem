@@ -1,13 +1,12 @@
 package com.dev.ticketing.system.model;
 
-import com.dev.ticketing.system.business.ticketassignment.AgentNode;
-
 public class UserModel {
 
 	private int userId;
+	private String firstName;
+	private String lastName;
 	private String emailAddress;
 	private boolean isAgent;
-	private AgentNode agentNode;
 
 	public int getUserId() {
 		return userId;
@@ -15,6 +14,22 @@ public class UserModel {
 
 	public void setUserId(int userId) {
 		this.userId = userId;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getEmailAddress() {
@@ -31,14 +46,6 @@ public class UserModel {
 
 	public void setAgent(boolean isAgent) {
 		this.isAgent = isAgent;
-	}
-
-	public AgentNode getAgentNode() {
-		return agentNode;
-	}
-
-	public void setAgentNode(AgentNode agentNode) {
-		this.agentNode = agentNode;
 	}
 
 }
